@@ -10,12 +10,15 @@ import {
   type BatchMeta,
 } from "@/lib/blob";
 
-// 没配 Token 时给出明确提示，而不是莫名的 500
+// 没配存储时给出明确提示，而不是莫名的 500
+// 线上：连接 Blob 存储后会自动注入 BLOB_STORE_ID（SDK 自动鉴权）
+// 本地：.env.local 里放 BLOB_READ_WRITE_TOKEN
 function missingToken() {
   return (
+    !process.env.BLOB_STORE_ID &&
     !process.env.BLOB_READ_WRITE_TOKEN &&
     NextResponse.json(
-      { error: "缺少 BLOB_READ_WRITE_TOKEN：本地放 .env.local，线上在 Vercel Storage 连接项目" },
+      { error: "缺少存储配置：线上在 Vercel Storage 连接项目后重新部署，本地放 .env.local" },
       { status: 500 }
     )
   );

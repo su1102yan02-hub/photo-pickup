@@ -22,9 +22,9 @@ export async function GET(
   if (codeKey.length !== 8) {
     return NextResponse.json({ error: "取件码是 8 位字母数字" }, { status: 400 });
   }
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+  if (!process.env.BLOB_STORE_ID && !process.env.BLOB_READ_WRITE_TOKEN) {
     return NextResponse.json(
-      { error: "服务端缺少 BLOB_READ_WRITE_TOKEN，请先在 Vercel 创建 Blob 存储并连接项目" },
+      { error: "服务端缺少存储配置：请先在 Vercel Storage 创建 Blob 并连接到本项目，然后重新部署" },
       { status: 500 }
     );
   }

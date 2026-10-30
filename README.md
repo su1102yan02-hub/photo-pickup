@@ -42,7 +42,7 @@ npm install
 Copy-Item .env.example .env.local
 ```
 
-编辑 `.env.local` 填三项：`ADMIN_PASSWORD`（自己设的长密码）、`BLOB_READ_WRITE_TOKEN`（Vercel 控制台 Copy Token）、`CRON_SECRET`（随便一串随机字符）。
+编辑 `.env.local` 填三项：`ADMIN_PASSWORD`（自己设的长密码）、`BLOB_READ_WRITE_TOKEN`（Vercel 控制台存储详情页创建的令牌，仅本地需要）、`CRON_SECRET`（随便一串随机字符）。
 
 ```bash
 npm run dev
@@ -67,7 +67,7 @@ npm run dev
 
 2. **导入项目**：[vercel.com](https://vercel.com) 用 GitHub 账号登录 → Add New… → Project → 选中 `photo-pickup` → 其他都不用改。
 
-3. **创建 Blob 存储**：项目页顶部 **Storage** 标签 → Create Database → 选 **Blob** → 名字随意 → 创建后点 **Connect to Project**（会自动把 `BLOB_READ_WRITE_TOKEN` 注入环境变量）。
+3. **创建 Blob 存储**：项目页顶部 **Storage** 标签 → Create Database → 选 **Blob** → 名字随意 → 创建后点 **Connect to Project**（会自动把 `BLOB_STORE_ID` 注入环境变量，SDK 自动鉴权，无需手动令牌）。
 
 4. **加环境变量**：Settings → Environment Variables，添加两个：
    - `ADMIN_PASSWORD` = 你的管理密码（设长一点！这就是唯一的管理凭证）
@@ -88,7 +88,7 @@ npm run dev
 | 现象 | 原因 / 处理 |
 | --- | --- |
 | 上传时报 401 | 没登录或 Cookie 过期，刷新页面重新登录 |
-| 本地报 `BLOB_READ_WRITE_TOKEN` 缺失 | `.env.local` 没填 Token，先去 Vercel 建好 Blob 存储 |
+| 报缺少存储配置 / BLOB 相关 500 | 没在 Vercel Storage 连接 Blob 存储并重新部署，或本地 `.env.local` 没填令牌 |
 | 客人说取件码无效 | 过期了 / 被删了 / 输错了（大小写、横线都随意，8 位对上就行） |
 | 打包 ZIP 失败 | 相册太大或网络不稳，改用"逐张下载" |
 | 想改管理密码 | 改 Vercel 环境变量 `ADMIN_PASSWORD` 再 Redeploy，所有已登录会话自动失效 |
