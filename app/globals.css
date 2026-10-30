@@ -1,15 +1,20 @@
-/* ===== 主题 ===== */
+/* ===== 主题（浅色 · 暖调纸感） ===== */
 :root {
-  --bg: #0d0f13;
-  --panel: #151922;
-  --panel-2: #1b2130;
-  --border: #262e3f;
-  --text: #e9ecf3;
-  --muted: #8a93a8;
-  --accent: #e0aa4f;
-  --accent-strong: #f0be6a;
-  --danger: #e5604f;
-  --ok: #4cc38a;
+  color-scheme: light;
+  --bg: #f7f5f1;
+  --panel: #ffffff;
+  --panel-2: #f6f3ed;
+  --border: #e8e3d9;
+  --text: #33302a;
+  --muted: #8f8877;
+  --accent: #b47f24;
+  --accent-strong: #96691b;
+  --accent-soft: rgba(212, 165, 60, 0.14);
+  --danger: #c2452f;
+  --ok: #2e9e6b;
+  --shadow-sm: 0 1px 2px rgba(64, 48, 10, 0.05);
+  --shadow-md: 0 1px 2px rgba(64, 48, 10, 0.04), 0 10px 30px rgba(64, 48, 10, 0.08);
+  --shadow-lg: 0 2px 4px rgba(64, 48, 10, 0.05), 0 24px 60px rgba(64, 48, 10, 0.13);
   --radius: 14px;
 }
 
@@ -23,19 +28,36 @@ body {
 }
 body {
   background:
-    radial-gradient(1200px 500px at 50% -10%, rgba(224, 170, 79, 0.08), transparent 60%),
+    radial-gradient(900px 420px at 85% -5%, rgba(212, 165, 60, 0.16), transparent 60%),
+    radial-gradient(700px 380px at -10% 30%, rgba(226, 149, 120, 0.09), transparent 60%),
     var(--bg);
   color: var(--text);
   font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB",
     "Microsoft YaHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
   min-height: 100vh;
 }
+::selection {
+  background: rgba(212, 165, 60, 0.32);
+}
 a {
-  color: var(--accent);
+  color: var(--accent-strong);
   text-decoration: none;
 }
 button {
   font-family: inherit;
+}
+
+/* 入场动效：卡片与照片轻微上浮 */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* ===== 布局 ===== */
@@ -76,30 +98,42 @@ button {
 }
 .hero-card {
   width: 100%;
-  max-width: 420px;
+  max-width: 430px;
   text-align: center;
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 40px 32px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  border-radius: 24px;
+  padding: 44px 34px 36px;
+  box-shadow: var(--shadow-lg);
+  animation: fadeUp 0.4s ease both;
 }
 .hero-logo {
-  font-size: 40px;
-  margin-bottom: 6px;
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  border-radius: 26px;
+  background: linear-gradient(135deg, #f3d9a4, #d9a441);
+  box-shadow: 0 10px 24px rgba(180, 127, 36, 0.3);
 }
 .hero-card h1 {
   margin: 0 0 6px;
-  font-size: 26px;
-  letter-spacing: 2px;
+  font-size: 27px;
+  font-weight: 600;
+  letter-spacing: 6px;
+  font-family: Georgia, "Times New Roman", "STZhongsong", "SimSun", serif;
 }
 
 .code-input {
   width: 100%;
-  margin: 22px 0 12px;
+  margin: 24px 0 12px;
   padding: 14px 16px;
   font-size: 26px;
-  letter-spacing: 6px;
+  font-weight: 600;
+  letter-spacing: 8px;
   text-align: center;
   text-transform: uppercase;
   background: var(--panel-2);
@@ -107,9 +141,14 @@ button {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   outline: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 .code-input:focus {
   border-color: var(--accent);
+  background: #fff;
+  box-shadow: 0 0 0 4px var(--accent-soft);
 }
 
 /* ===== 控件 ===== */
@@ -117,16 +156,20 @@ button {
 .select {
   padding: 10px 12px;
   font-size: 14px;
-  background: var(--panel-2);
+  background: #fff;
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 10px;
   outline: none;
   min-width: 0;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 .input:focus,
 .select:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 .input {
   flex: 1;
@@ -142,7 +185,7 @@ button {
   border-radius: 10px;
   border: 1px solid transparent;
   transition: all 0.15s ease;
-  background: var(--panel-2);
+  background: #fff;
   color: var(--text);
 }
 .btn:disabled {
@@ -150,28 +193,37 @@ button {
   cursor: not-allowed;
 }
 .btn-primary {
-  background: var(--accent);
-  color: #1c1503;
-  font-weight: 600;
+  background: linear-gradient(135deg, #d9a441, #b47f24);
+  color: #fffdf7;
+  font-weight: 700;
+  text-shadow: 0 1px 1px rgba(90, 60, 5, 0.25);
+  box-shadow: 0 6px 16px rgba(180, 127, 36, 0.35);
 }
 .btn-primary:not(:disabled):hover {
-  background: var(--accent-strong);
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(180, 127, 36, 0.42);
+}
+.btn-primary:not(:disabled):active {
+  transform: translateY(0);
 }
 .btn-ghost {
-  background: transparent;
+  background: #fff;
   border-color: var(--border);
+  box-shadow: var(--shadow-sm);
 }
 .btn-ghost:not(:disabled):hover {
   border-color: var(--accent);
-  color: var(--accent);
+  color: var(--accent-strong);
 }
 .btn-danger {
-  background: transparent;
+  background: #fff;
   border-color: var(--border);
   color: var(--danger);
 }
 .btn-danger:not(:disabled):hover {
   border-color: var(--danger);
+  background: #fdf1ee;
 }
 .btn-sm {
   padding: 6px 12px;
@@ -200,9 +252,9 @@ button {
   font-size: 12px;
 }
 .note {
-  background: rgba(224, 170, 79, 0.1);
-  border: 1px solid rgba(224, 170, 79, 0.35);
-  color: var(--accent-strong);
+  background: #fdf6e7;
+  border: 1px solid #ecd9ae;
+  color: #7c5a17;
   padding: 10px 14px;
   border-radius: 10px;
   font-size: 14px;
@@ -215,8 +267,8 @@ button {
 }
 .badge {
   font-size: 12px;
-  color: var(--danger);
-  border: 1px solid var(--danger);
+  color: #b03a26;
+  background: #fdecea;
   border-radius: 999px;
   padding: 2px 10px;
 }
@@ -227,10 +279,12 @@ button {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 18px;
+  box-shadow: var(--shadow-sm);
 }
 .panel-title {
   margin: 0 0 14px;
-  font-size: 16px;
+  font-size: 15px;
+  font-weight: 600;
 }
 .new-batch {
   margin-bottom: 16px;
@@ -248,10 +302,16 @@ button {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 .batch-card.active {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent);
+  border-color: #d9a441;
+  background: #fffdf6;
+  box-shadow:
+    0 0 0 1px #d9a441,
+    var(--shadow-sm);
 }
 .batch-card.expired {
   opacity: 0.55;
@@ -259,21 +319,27 @@ button {
 .code-chip {
   font-family: ui-monospace, Consolas, monospace;
   font-size: 18px;
+  font-weight: 600;
   letter-spacing: 2px;
   color: var(--accent-strong);
+  background: var(--accent-soft);
+  border-radius: 8px;
+  padding: 2px 10px;
 }
 
 .dropzone {
-  border: 2px dashed var(--border);
-  border-radius: 12px;
-  padding: 34px 18px;
+  border: 2px dashed #d9d2c4;
+  border-radius: 14px;
+  padding: 36px 18px;
   text-align: center;
   cursor: pointer;
   margin: 12px 0;
-  transition: border-color 0.15s ease;
+  background: #fbf9f5;
+  transition: all 0.15s ease;
 }
 .dropzone:hover {
   border-color: var(--accent);
+  background: #fdf9ef;
 }
 
 .task-list {
@@ -284,8 +350,16 @@ button {
   max-height: 480px;
   overflow-y: auto;
 }
+.task-list::-webkit-scrollbar {
+  width: 8px;
+}
+.task-list::-webkit-scrollbar-thumb {
+  background: #ddd6c8;
+  border-radius: 4px;
+}
 .task {
   background: var(--panel-2);
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 8px 12px;
   font-size: 13px;
@@ -312,13 +386,13 @@ button {
 .bar {
   height: 4px;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.08);
+  background: #ece7dc;
   margin-top: 6px;
   overflow: hidden;
 }
 .bar-fill {
   height: 100%;
-  background: var(--accent);
+  background: linear-gradient(90deg, #d9a441, #b47f24);
   transition: width 0.2s ease;
 }
 
@@ -333,7 +407,10 @@ button {
 }
 .gallery-head h1 {
   margin: 0 0 4px;
-  font-size: 24px;
+  font-size: 25px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  font-family: Georgia, "Times New Roman", "STZhongsong", "SimSun", serif;
 }
 .gallery {
   columns: 5 210px;
@@ -350,23 +427,27 @@ button {
   overflow: hidden;
   cursor: zoom-in;
   background: var(--panel);
+  box-shadow: var(--shadow-sm);
   break-inside: avoid;
   text-align: left;
   color: var(--text);
+  animation: fadeUp 0.35s ease both;
   transition:
     transform 0.15s ease,
+    box-shadow 0.15s ease,
     border-color 0.15s ease;
 }
 .ph:hover {
-  transform: translateY(-2px);
-  border-color: var(--accent);
+  transform: translateY(-3px);
+  border-color: #e3c67f;
+  box-shadow: var(--shadow-md);
 }
 .ph img {
   width: 100%;
   display: block;
   min-height: 60px;
   object-fit: cover;
-  background: var(--panel-2);
+  background: #f1ede5;
 }
 .ph-holder {
   display: flex;
@@ -389,12 +470,12 @@ button {
   white-space: nowrap;
 }
 
-/* ===== 灯箱 ===== */
+/* ===== 灯箱（看片保持深底，突出照片本身） ===== */
 .modal-overlay {
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: rgba(5, 6, 9, 0.92);
+  background: rgba(24, 20, 12, 0.93);
   display: flex;
   flex-direction: column;
 }
@@ -405,6 +486,7 @@ button {
   gap: 12px;
   padding: 12px 18px;
   font-size: 14px;
+  color: #f4f0e6;
 }
 .modal-body {
   flex: 1;
@@ -428,14 +510,15 @@ button {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text);
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(6px);
   font-size: 22px;
   cursor: pointer;
 }
 .nav-btn:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.24);
 }
 .nav-btn.left {
   left: 8px;
@@ -448,13 +531,14 @@ button {
   height: 34px;
   border-radius: 50%;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text);
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(6px);
   font-size: 15px;
 }
 .icon-btn:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.24);
 }
 
 @media (max-width: 640px) {
