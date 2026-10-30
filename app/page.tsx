@@ -68,8 +68,10 @@ export default function HomePage() {
     setError("");
     try {
       const res = await fetch(`/api/pickup/${code}`, { cache: "no-store" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "获取失败");
+      const data = (await res.json().catch(() => null)) as Gallery | { error?: string } | null;
+      if (!res.ok || !data || !("files" in data)) {
+        throw new Error((data && "error" in data && data.error) || `获取失败（HTTP ${res.status}）`);
+      }
       setGallery(data);
       setPhase("done");
     } catch (e) {

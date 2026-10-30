@@ -56,14 +56,24 @@ export default function AdminPage() {
   const dirInput = useRef<HTMLInputElement>(null);
 
   async function load() {
-    const res = await fetch("/api/admin/batches", { cache: "no-store" });
-    if (res.status === 401) {
+    try {
+      const res = await fetch("/api/admin/batches", { cache: "no-store" });
+      if (res.status === 401) {
+        setAuthed(false);
+        return;
+      }
+      const data = await res.json().catch(() => null as { batches?: BatchInfo[]; error?: string } | null);
+      if (!res.ok || !data) {
+        setAuthed(true); // 已登录但加载失败，进管理页显示错误，别把人踢回登录页
+        setNote(data?.error || `加载相册列表失败（HTTP ${res.status}）`);
+        return;
+      }
+      setBatches(data.batches ?? []);
+      setAuthed(true);
+    } catch {
       setAuthed(false);
-      return;
+      setNote("网络错误，请刷新重试");
     }
-    const data = await res.json();
-    setBatches(data.batches ?? []);
-    setAuthed(true);
   }
 
   useEffect(() => {
@@ -104,9 +114,9 @@ export default function AdminPage() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ name: newName, days }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "创建失败");
-      setBatches((bs) => [data.batch, ...bs]);
+      const data = await res.json().catch(() => null as { error?: string; batch?: BatchInfo } | null);
+      if (!res.ok || !data?.batch) throw new Error(data?.error || `创建失败（HTTP ${res.status}）`);
+      setBatches((bs) => [data.batch!, ...bs]);
       setNewName("");
       await selectBatch(data.batch);
     } catch (e) {

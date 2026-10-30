@@ -29,41 +29,46 @@ export async function GET(
     );
   }
 
-  const meta = (await listBatches()).find((m) => m.codeKey === codeKey);
-  if (!meta || isExpired(meta)) {
-    return NextResponse.json({ error: "取件码不存在或已过期" }, { status: 404 });
-  }
-
-  // 缩略图：b/{batchId}/t/{序号}.webp → 按序号建索引
-  const thumbs = new Map<number, string>();
-  for (const blob of (await list({ prefix: `b/${meta.batchId}/t/` })).blobs) {
-    const m = blob.pathname.match(/\/t\/(\d+)\.webp$/);
-    if (m) thumbs.set(Number(m[1]), blob.url);
-  }
-
-  // 原图：b/{batchId}/f/{序号}-{URL编码的文件名}
-  const files: FileEntry[] = [];
-  for (const blob of (await list({ prefix: `b/${meta.batchId}/f/` })).blobs) {
-    const m = blob.pathname.match(/\/f\/(\d+)-(.+)$/);
-    if (!m) continue;
-    let name = m[2];
-    try {
-      name = decodeURIComponent(name);
-    } catch {
-      // 文件名编码异常就用原始串，不影响下载
+  try {
+    const meta = (await listBatches()).find((m) => m.codeKey === codeKey);
+    if (!meta || isExpired(meta)) {
+      return NextResponse.json({ error: "取件码不存在或已过期" }, { status: 404 });
     }
-    files.push({
-      seq: Number(m[1]),
-      name,
-      size: blob.size,
-      url: blob.url,
-      thumb: thumbs.get(Number(m[1])),
-    });
-  }
-  files.sort((a, b) => a.seq - b.seq);
 
-  return NextResponse.json(
-    { name: meta.name, expiresAt: meta.expiresAt, files },
-    { headers: { "cache-control": "no-store" } }
-  );
+    // 缩略图：b/{batchId}/t/{序号}.webp → 按序号建索引
+    const thumbs = new Map<number, string>();
+    for (const blob of (await list({ prefix: `b/${meta.batchId}/t/` })).blobs) {
+      const m = blob.pathname.match(/\/t\/(\d+)\.webp$/);
+      if (m) thumbs.set(Number(m[1]), blob.url);
+    }
+
+    // 原图：b/{batchId}/f/{序号}-{URL编码的文件名}
+    const files: FileEntry[] = [];
+    for (const blob of (await list({ prefix: `b/${meta.batchId}/f/` })).blobs) {
+      const m = blob.pathname.match(/\/f\/(\d+)-(.+)$/);
+      if (!m) continue;
+      let name = m[2];
+      try {
+        name = decodeURIComponent(name);
+      } catch {
+        // 文件名编码异常就用原始串，不影响下载
+      }
+      files.push({
+        seq: Number(m[1]),
+        name,
+        size: blob.size,
+        url: blob.url,
+        thumb: thumbs.get(Number(m[1])),
+      });
+    }
+    files.sort((a, b) => a.seq - b.seq);
+
+    return NextResponse.json(
+      { name: meta.name, expiresAt: meta.expiresAt, files },
+      { headers: { "cache-control": "no-store" } }
+    );
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    return NextResponse.json({ error: `服务端错误：${message}` }, { status: 500 });
+  }
 }

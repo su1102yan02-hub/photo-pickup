@@ -24,23 +24,33 @@ function missingToken() {
   );
 }
 
+// 线上意外报错时把真实原因带回页面显示，避免前端只看到空 500
+function serverError(e: unknown) {
+  const message = e instanceof Error ? e.message : String(e);
+  return NextResponse.json({ error: `服务端错误：${message}` }, { status: 500 });
+}
+
 // 列出全部相册（含已过期的，方便手动删除释放空间）
 export async function GET() {
   if (!(await isAdmin())) return NextResponse.json({ error: "未登录" }, { status: 401 });
   const err = missingToken();
   if (err) return err;
-  const metas = await listBatches();
-  return NextResponse.json({
-    batches: metas.map((m) => ({
-      batchId: m.batchId,
-      codeKey: m.codeKey,
-      code: codeDisplay(m.codeKey),
-      name: m.name,
-      createdAt: m.createdAt,
-      expiresAt: m.expiresAt,
-      expired: isExpired(m),
-    })),
-  });
+  try {
+    const metas = await listBatches();
+    return NextResponse.json({
+      batches: metas.map((m) => ({
+        batchId: m.batchId,
+        codeKey: m.codeKey,
+        code: codeDisplay(m.codeKey),
+        name: m.name,
+        createdAt: m.createdAt,
+        expiresAt: m.expiresAt,
+        expired: isExpired(m),
+      })),
+    });
+  } catch (e) {
+    return serverError(e);
+  }
 }
 
 // 新建相册：生成 8 位取件码 + 随机 batchId，把元数据写进 meta.json
@@ -52,26 +62,30 @@ export async function POST(request: Request) {
   const name = (body.name ?? "").toString().trim().slice(0, 60) || "未命名相册";
   const days = Math.min(30, Math.max(1, Number(body.days) || 7));
 
-  // 取件码撞车概率约等于零，但还是查一下已有相册
-  const existing = await listBatches();
-  let codeKey = generateCode();
-  for (let i = 0; i < 10 && existing.some((m) => m.codeKey === codeKey); i++) {
-    codeKey = generateCode();
-  }
+  try {
+    // 取件码撞车概率约等于零，但还是查一下已有相册
+    const existing = await listBatches();
+    let codeKey = generateCode();
+    for (let i = 0; i < 10 && existing.some((m) => m.codeKey === codeKey); i++) {
+      codeKey = generateCode();
+    }
 
-  const now = Date.now();
-  const meta: BatchMeta = {
-    batchId: generateBatchId(),
-    codeKey,
-    name,
-    createdAt: now,
-    expiresAt: now + days * 86400000,
-  };
-  await putBatchMeta(meta);
-  return NextResponse.json({
-    ok: true,
-    batch: { ...meta, code: codeDisplay(codeKey), expired: false },
-  });
+    const now = Date.now();
+    const meta: BatchMeta = {
+      batchId: generateBatchId(),
+      codeKey,
+      name,
+      createdAt: now,
+      expiresAt: now + days * 86400000,
+    };
+    await putBatchMeta(meta);
+    return NextResponse.json({
+      ok: true,
+      batch: { ...meta, code: codeDisplay(codeKey), expired: false },
+    });
+  } catch (e) {
+    return serverError(e);
+  }
 }
 
 // 删除整个相册（元数据 + 原图 + 缩略图）
@@ -83,6 +97,10 @@ export async function DELETE(request: Request) {
   if (!/^[a-z0-9]{12}$/.test(batchId)) {
     return NextResponse.json({ error: "参数不对" }, { status: 400 });
   }
-  await deleteBatch(batchId);
+  try {
+    await deleteBatch(batchId);
+  } catch (e) {
+    return serverError(e);
+  }
   return NextResponse.json({ ok: true });
 }
